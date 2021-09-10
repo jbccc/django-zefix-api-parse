@@ -1,0 +1,24 @@
+Zefix API : 
+auth = ('jeanbaptiste.conan.jbc@gmail.com', 'tgVqA5hD')
+
+headers = {"Authorization": "Basic amVhbmJhcHRpc3RlLmNvbmFuLmpiY0BnbWFpbC5jb206dGdWcUE1aEQ="}
+
+Shell prof : https://github.com/nxt-engineering/alfred-zefix/
+Script associated :
+curl --silent \
+     --header "Content-Type: application/json" \
+     --request POST \
+     --data "{\"name\":\"Junior\",\"languageKey\":\"en\",\"searchType\":\"exact\",\"maxEntries\":15,\"offset\":0}" \
+     https://www.zefix.ch/ZefixREST/api/v1/firm/search.json \
+
+use curl python : https://stackoverflow.com/questions/25491090/how-to-use-python-to-execute-a-curl-command/48005899
+
+curl --silent --header "Content-Type: application/json" --request POST --data "{\"publicationDate\":\"2021-08-27\",\"publicationDateEnd\":\"2021-08-27\",\"maxEntries\":15,\"mutationTypes\":[2],\"offset\":223876}" https://www.zefix.ch/ZefixREST/api/v1/shab/search.json;
+
+
+PDF @ https://www.shab.ch/shabforms/servlet/Search?EID=7&DOCID=%s'%'1501019
+
+Prod : https://www.zefix.admin.ch/ZefixPublicREST/
+Dev  : https://www.zefixintg.admin.ch/ZefixPublicREST/
+
+{\"publicationDate\":\"2021-08-27\",\"publicationDateEnd\":\"2021-08-27\",\"maxEntries\":5000,\"mutationTypes\":[2],\"offset\":223876}
