@@ -11,7 +11,8 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
-
+import os
+from django.utils import timezone
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -20,12 +21,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-ao&%#s0hvbke-x8v=(vsvfzb0vz#7bu9rlh^0n=*^fsr09x$0i'
+SECRET_KEY = "django-insecure-+"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1']
+
+ALLOWED_HOSTS = ['api.jbconan.fr','127.0.0.1', 'localhost']
 
 
 # Application definition
@@ -37,8 +39,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_crontab',
+    'corsheaders',
+    'rest_framework',
+    'rest_framework.authtoken',
     'API',
-#    'django-crontab',
 ]
 
 MIDDLEWARE = [
@@ -49,7 +54,39 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ),
+    'EXCEPTION_HANDLER': 'rest_framework.views.exception_handler'
+}
+
+JWT_AUTH = {
+    'JWT_VERIFY': True,
+    'JWT_VERIFY_EXPIRATION': True, 
+    'JWT_LEEWAY': 0,
+    'JWT_EXPIRATION_DELTA': timezone.timedelta(seconds=3600),
+    'JWT_ALLOW_REFRESH': True,
+    'JWT_REFRESH_EXPIRATION_DELTA': timezone.timedelta(days=7),
+}
+
+
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:8080',
+]
+CORS_ALLOW_CREDENTIALS = True
+CORS_ORIGIN_WHITELIST = (
+   'localhost:8080',
+)
+
 
 ROOT_URLCONF = 'ScrapingZefixAPI.urls'
 
@@ -77,8 +114,11 @@ WSGI_APPLICATION = 'ScrapingZefixAPI.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'zefixapi_db',
+        'USER': 'scrapzefix',
+        'PASSWORD':'wgk6rryy9octic4v',
+        'HOST': 'localhost',
     }
 }
 
@@ -86,7 +126,9 @@ DATABASES = {
 # CRON
 
 CRONJOBS = [
-
+    ('0 6 * * *', 'API.cron.daily_mail', '>>' + os.path.join(BASE_DIR, 'log/mail.txt')),
+    ('0 0 * * *', 'API.cron.getFirms', '>>' + os.path.join(BASE_DIR, 'log/scrap.txt')),
+    ('0 2 * * *', 'API.cron.create_files', '>>' + os.path.join(BASE_DIR, 'log/files.txt')),
 ]
 
 # Password validation
@@ -113,21 +155,82 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Zurich'
 
 USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+# STATICFILES_DIRS = (BASE_DIR / "static",)
+MEDIA_ROOT = os.path.join(BASE_DIR,'uploads')
+MEDIA_URL = '/uploads/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+EMAIL_HOST = 'mail.infomaniak.ch'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'scraping.rc@affluence.ch'
+EMAIL_HOST_PASSWORD = 'Scraping_rc_2021'
+
+APP_DICT = {
+    "EN":{
+        'gender':[
+            "Mr.",
+            "Ms.",
+        ],
+    },
+    "FR":{
+        "gender":[
+            "Monsieur",
+            "Madame",
+            "Madame/Monsieur"
+        ],
+        "WEEKDAYS" : [
+            'Lundi', 
+            'Mardi',
+            'Mercredi',
+            'Jeudi',
+            'Vendredi',
+            'Samedi', 
+            'Dimanche',
+        ],
+        "MONTHS" : [
+            'Janvier',
+            'Février',
+            'Mars',
+            'Avril',
+            'Mai',
+            'Juin', 
+            'Juillet', 
+            'Août',
+            'Septembre', 
+            'Octobre', 
+            'Novembre',
+            'Décembre',
+        ],
+    },
+    "DE":{
+        'gender':[
+            "Herr",
+            "Frau",
+        ],
+    },
+}
+
+
+
+

@@ -15,11 +15,20 @@ Including another URLconf
 """
 from os import name
 from django.contrib import admin
-from django.urls import path
-from API import views
+from django.urls import path, include
+from django.conf.urls import url
+from django.conf.urls.static import static
+from ScrapingZefixAPI import settings
+
+from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('file/', views.file),
-    path('', views.test),
-]
+    url('v1/', include('API.urls')),
+    path('api-token/', obtain_jwt_token),
+    path('api-token-refresh/', refresh_jwt_token),
+] 
+
+if settings.DEBUG:
+    urlpatterns+= static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns+= static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
